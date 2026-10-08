@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Finder - MVP Preview</title>
+  <!-- Load React, ReactDOM, and Babel for standalone zero-install in-browser preview -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --color-bg: #f8fafc;
+      --color-card: #ffffff;
+      --color-text-main: #0f172a;
+      --color-text-muted: #64748b;
+      --color-border: #e2e8f0;
+      --color-border-subtle: #f1f5f9;
+      --color-primary: #2563eb;
+      --color-primary-hover: #1d4ed8;
+      --color-success-bg: #ecfdf5;
+      --color-success-text: #065f46;
+      --color-success-border: #a7f3d0;
+      --color-danger-bg: #fef2f2;
+      --color-danger-text: #991b1b;
+      --color-danger-border: #fecaca;
+      --color-chip-bg: #f1f5f9;
+      --color-chip-hover: #e2e8f0;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-family); background-color: var(--color-bg); color: var(--color-text-main); line-height: 1.5; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .app-container { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; min-height: 100vh; display: flex; flex-direction: column; }
+    .app-header { margin-bottom: 28px; }
+    .header-inner { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+    .logo-badge { display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid var(--color-border); padding: 4px 10px; border-radius: 9999px; font-size: 13px; box-shadow: var(--shadow-sm); }
+    .logo-icon { font-size: 16px; }
+    .logo-tag { font-weight: 700; letter-spacing: 0.05em; color: var(--color-primary); font-size: 11px; }
+    .app-title { font-size: 30px; font-weight: 700; color: var(--color-text-main); }
+    .app-subtitle { font-size: 15px; color: var(--color-text-muted); }
+    .main-content { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+    .search-section { display: flex; flex-direction: column; gap: 12px; }
+    .search-bar-form { display: flex; flex-wrap: wrap; gap: 10px; background: var(--color-card); padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); }
+    .search-input-group { flex: 1; min-width: 220px; }
+    .input-wrapper { position: relative; display: flex; align-items: center; }
+    .input-icon { position: absolute; left: 14px; width: 17px; height: 17px; color: var(--color-text-muted); pointer-events: none; }
+    .search-input { width: 100%; padding: 12px 14px 12px 40px; border: 1px solid transparent; border-radius: var(--radius-sm); font-size: 14px; color: var(--color-text-main); background: #f8fafc; transition: all 0.15s ease-in-out; }
+    .search-input:focus { outline: none; background: #ffffff; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
+    .search-button { padding: 12px 24px; background-color: var(--color-primary); color: #ffffff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 0.15s ease; white-space: nowrap; }
+    .search-button:hover:not(:disabled) { background-color: var(--color-primary-hover); }
+    .quick-examples { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 13px; }
+    .quick-label { color: var(--color-text-muted); font-weight: 500; }
+    .quick-chip { background: var(--color-chip-bg); color: var(--color-text-main); border: 1px solid var(--color-border); padding: 4px 10px; border-radius: 9999px; font-size: 12px; cursor: pointer; }
+    .quick-chip:hover { background: var(--color-chip-hover); border-color: #cbd5e1; }
+    .controls-section { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 4px 2px; }
+    .filter-checkbox-label { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font-size: 14px; font-weight: 500; color: var(--color-text-main); }
+    .filter-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-primary); }
+    .result-count { font-size: 14px; font-weight: 600; color: var(--color-text-muted); background: #ffffff; padding: 6px 14px; border-radius: 9999px; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); }
+    .results-container { background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; min-height: 240px; }
+    .table-responsive-wrapper { width: 100%; overflow-x: auto; }
+    .business-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    .business-table thead { background-color: #f8fafc; border-bottom: 1px solid var(--color-border); }
+    .business-table th { padding: 14px 18px; font-weight: 600; color: #475569; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+    .th-business { min-width: 200px; }
+    .th-website { min-width: 160px; }
+    .th-socials { min-width: 160px; }
+    .th-phone { min-width: 130px; }
+    .th-email { min-width: 180px; }
+    .business-table-row { border-bottom: 1px solid var(--color-border-subtle); }
+    .business-table-row:last-child { border-bottom: none; }
+    .business-table-row:hover { background-color: #fbfcfe; }
+    .business-table td { padding: 16px 18px; vertical-align: middle; }
+    .business-name-text { font-weight: 600; color: var(--color-text-main); }
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 10px; border-radius: 6px; width: fit-content; }
+    .status-badge.status-found { background-color: var(--color-success-bg); color: var(--color-success-text); border: 1px solid var(--color-success-border); }
+    .status-badge.status-missing { background-color: var(--color-danger-bg); color: var(--color-danger-text); border: 1px solid var(--color-danger-border); }
+    .website-link { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+    .socials-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .social-link { display: inline-block; background: #f1f5f9; color: #334155; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; border: 1px solid #e2e8f0; }
+    .social-link:hover { background: #e2e8f0; color: var(--color-primary); text-decoration: none; }
+    .contact-link { color: var(--color-text-main); }
+    .value-missing { color: #94a3b8; font-size: 13px; font-style: italic; }
+    .state-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; gap: 14px; }
+    .state-icon { font-size: 32px; }
+    .state-message { font-size: 15px; color: var(--color-text-muted); max-width: 440px; }
+    .spinner { width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .app-footer { margin-top: 40px; text-align: center; font-size: 13px; color: var(--color-text-muted); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const mockDataset = [
+      {
+        name: "Smile Dental Clinic",
+        category: "dental clinic",
+        location: "Hetauda",
+        website: "https://smiledentalhetauda.com",
+        socials: [{ platform: "Instagram", url: "https://instagram.com/smiledental_np" }],
+        phone: "9801234567",
+        email: "info@smiledentalhetauda.com"
+      },
+      {
+        name: "Hetauda Dental Care & Implant Center",
+        category: "dental clinic",
+        location: "Hetauda",
+        website: null,
+        socials: [{ platform: "Facebook", url: "https://facebook.com/hetaudadentalcare" }],
+        phone: "9811223344",
+        email: null
+      },
+      {
+        name: "City Dental Hospital & Orthodontic Center",
+        category: "dental clinic",
+        location: "Hetauda",
+        website: null,
+        socials: [],
+        phone: "9845012345",
+        email: "citydental.htd@gmail.com"
+      },
+      {
+        name: "Makwanpur Dental Clinic",
+        category: "dental clinic",
+        location: "Hetauda",
+        website: "https://makwanpurdental.com.np",
+        socials: [{ platform: "Facebook", url: "https://facebook.com/makwanpurdental" }],
+        phone: "057-520111",
+        email: null
+      },
+      {
+        name: "Apex Oral & Dental Care",
+        category: "dental clinic",
+        location: "Hetauda",
+        website: null,
+        socials: [{ platform: "Instagram", url: "https://instagram.com/apexdental_htd" }],
+        phone: "9865123456",
+        email: null
+      },
+      {
+        name: "Himalayan Java Coffee",
+        category: "restaurant",
+        location: "Kathmandu",
+        website: "https://himalayanjava.com",
+        socials: [{ platform: "Instagram", url: "https://instagram.com/himalayanjava" }],
+        phone: "01-4422556",
+        email: "contact@himalayanjava.com"
+      },
+      {
+        name: "Bhojan Griha Authentic Nepali",
+        category: "restaurant",
+        location: "Kathmandu",
+        website: "https://bhojangriha.com",
+        socials: [{ platform: "Facebook", url: "https://facebook.com/bhojangriha" }],
+        phone: "01-4416423",
+        email: "bhojan@griha.com"
+      },
+      {
+        name: "Kathmandu Momo Corner & Sekuwa",
+        category: "restaurant",
+        location: "Kathmandu",
+        website: null,
+        socials: [{ platform: "Facebook", url: "https://facebook.com/ktmmomocorner" }],
+        phone: "9802345678",
+        email: null
+      },
+      {
+        name: "Thamel Local Thakali Kitchen",
+        category: "restaurant",
+        location: "Kathmandu",
+        website: null,
+        socials: [],
+        phone: "9841890123",
+        email: null
+      },
+      {
+        name: "Chitwan Forest Resort",
+        category: "hotel",
+        location: "Sauraha",
+        website: "https://chitwanforestresort.com",
+        socials: [{ platform: "Facebook", url: "https://facebook.com/chitwanforestresort" }],
+        phone: "056-580120",
+        email: "booking@chitwanforestresort.com"
+      },
+      {
+        name: "Sauraha Riverside Lodge",
+        category: "hotel",
+        location: "Sauraha",
+        website: null,
+        socials: [{ platform: "Facebook", url: "https://facebook.com/saurahariverside" }],
+        phone: "9855012345",
+        email: null
+      },
+      {
+        name: "Iron Fitness Club",
+        category: "gym",
+        location: "Hetauda",
+        website: null,
+        socials: [{ platform: "Instagram", url: "https://instagram.com/ironfitness_htd" }],
+        phone: "9845112233",
+        email: null
+      },
+      {
+        name: "Body Crafters Gym",
+        category: "gym",
+        location: "Hetauda",
+        website: "https://bodycraftersgym.com",
+        socials: [{ platform: "Instagram", url: "https://instagram.com/bodycrafters_official" }],
+        phone: "057-524333",
+        email: "info@bodycraftersgym.com"
+      },
+      {
+        name: "Glamour Zone Beauty Studio",
+        category: "beauty salon",
+        location: "Kathmandu",
+        website: null,
+        socials: [{ platform: "Instagram", url: "https://instagram.com/glamourzone_ktm" }],
+        phone: "9803456789",
+        email: null
+      },
+      {
+        name: "NeelDavid's Salon & Academy",
+        category: "beauty salon",
+        location: "Kathmandu",
+        website: "https://neeldavids.com",
+        socials: [{ platform: "Instagram", url: "https://instagram.com/neeldavidssalon" }],
+        phone: "01-4433221",
+        email: "ktm@neeldavids.com"
+      }
+    ];
+
+    function StatusBadge({ website }) {
+      if (website) {
+        return (
+          <div className="status-badge status-found">
+            <span className="status-icon">✅</span>
+            <a href={website} target="_blank" rel="noopener noreferrer" className="website-link">
+              Visit website
+            </a>
+          </div>
+        );
+      }
+      return (
+        <div className="status-badge status-missing">
+          <span className="status-icon">❌</span>
+          <span className="status-text">No website found</span>
+        </div>
+      );
+    }
+
+    function BusinessRow({ business }) {
+      const { name, website, socials, phone, email } = business;
+      return (
+        <tr className="business-table-row">
+          <td className="col-name">
+            <span className="business-name-text">{name || "Unnamed Business"}</span>
+          </td>
+          <td className="col-website">
+            <StatusBadge website={website} />
+          </td>
+          <td className="col-socials">
+            {socials && socials.length > 0 ? (
+              <div className="socials-list">
+                {socials.map((item, idx) => (
+                  <a key={idx} href={item.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                    {item.platform || "Social Link"}
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <span className="value-missing">Not found</span>
+            )}
+          </td>
+          <td className="col-phone">
+            {phone ? (
+              <a href={`tel:${phone}`} className="contact-link">{phone}</a>
+            ) : (
+              <span className="value-missing">Not found</span>
+            )}
+          </td>
+          <td className="col-email">
+            {email ? (
+              <a href={`mailto:${email}`} className="contact-link">{email}</a>
+            ) : (
+              <span className="value-missing">Not found</span>
+            )}
+          </td>
+        </tr>
+      );
+    }
+
+    function App() {
+      const [query, setQuery] = useState("Dental clinics");
+      const [location, setLocation] = useState("Hetauda");
+      const [businesses, setBusinesses] = useState([]);
+      const [onlyNoWebsite, setOnlyNoWebsite] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
+      const [hasSearched, setHasSearched] = useState(false);
+
+      const runSearch = (q = query, l = location) => {
+        setIsLoading(true);
+        setTimeout(() => {
+          const cleanQ = q.trim().toLowerCase();
+          const cleanL = l.trim().toLowerCase();
+
+          const results = mockDataset.filter((item) => {
+            const name = (item.name || "").toLowerCase();
+            const cat = (item.category || "").toLowerCase();
+            const loc = (item.location || "").toLowerCase();
+
+            const matchesLoc = !cleanL || loc.includes(cleanL) || cleanL.includes(loc);
+            const matchesQ = !cleanQ || cat.includes(cleanQ) || name.includes(cleanQ) ||
+              cleanQ.split(" ").some((w) => w.length > 2 && (cat.includes(w) || name.includes(w)));
+
+            return matchesLoc && matchesQ;
+          });
+
+          setBusinesses(results);
+          setIsLoading(false);
+          setHasSearched(true);
+        }, 300);
+      };
+
+      useEffect(() => {
+        runSearch("Dental clinics", "Hetauda");
+      }, []);
+
+      const displayedBusinesses = onlyNoWebsite
+        ? businesses.filter((b) => !b.website || b.website.trim() === "")
+        : businesses;
+
+      const countText = onlyNoWebsite
+        ? `${displayedBusinesses.length} ${displayedBusinesses.length === 1 ? "business" : "businesses"} without websites`
+        : `${displayedBusinesses.length} ${displayedBusinesses.length === 1 ? "business" : "businesses"} found`;
+
+      return (
+        <div className="app-container">
+          <header className="app-header">
+            <div className="header-inner">
+              <div className="logo-badge">
+                <span className="logo-icon">🏢</span>
+                <span className="logo-tag">MVP</span>
+              </div>
+              <h1 className="app-title">Business Finder</h1>
+              <p className="app-subtitle">Find local businesses and identify which ones do not have a website.</p>
+            </div>
+          </header>
+
+          <main className="main-content">
+            <section className="search-section">
+              <form className="search-bar-form" onSubmit={(e) => { e.preventDefault(); runSearch(query, location); }}>
+                <div className="search-input-group">
+                  <div className="input-wrapper">
+                    <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input
+                      type="text"
+                      className="search-input"
+                      placeholder="Business type (e.g. Dental clinics, Gyms, Restaurants)"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="search-input-group">
+                  <div className="input-wrapper">
+                    <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <input
+                      type="text"
+                      className="search-input"
+                      placeholder="Location (e.g. Hetauda, Kathmandu)"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="search-button" disabled={isLoading}>
+                  {isLoading ? "Searching..." : "Search"}
+                </button>
+              </form>
+
+              <div className="quick-examples">
+                <span className="quick-label">Try:</span>
+                <button type="button" className="quick-chip" onClick={() => { setQuery("Dental clinics"); setLocation("Hetauda"); runSearch("Dental clinics", "Hetauda"); }}>
+                  Dental clinics in Hetauda
+                </button>
+                <button type="button" className="quick-chip" onClick={() => { setQuery("Restaurants"); setLocation("Kathmandu"); runSearch("Restaurants", "Kathmandu"); }}>
+                  Restaurants in Kathmandu
+                </button>
+                <button type="button" className="quick-chip" onClick={() => { setQuery("Hotels"); setLocation("Sauraha"); runSearch("Hotels", "Sauraha"); }}>
+                  Hotels in Sauraha
+                </button>
+                <button type="button" className="quick-chip" onClick={() => { setQuery("Gyms"); setLocation("Hetauda"); runSearch("Gyms", "Hetauda"); }}>
+                  Gyms in Hetauda
+                </button>
+              </div>
+            </section>
+
+            <section className="controls-section">
+              <label className="filter-checkbox-label">
+                <input
+                  type="checkbox"
+                  className="filter-checkbox"
+                  checked={onlyNoWebsite}
+                  onChange={(e) => setOnlyNoWebsite(e.target.checked)}
+                />
+                <span>Show only businesses without websites</span>
+              </label>
+
+              {!isLoading && hasSearched && (
+                <div className="result-count">{countText}</div>
+              )}
+            </section>
+
+            <section className="results-container">
+              {isLoading && (
+                <div className="state-card">
+                  <div className="spinner"></div>
+                  <p className="state-message">Finding businesses...</p>
+                </div>
+              )}
+
+              {!isLoading && hasSearched && displayedBusinesses.length === 0 && (
+                <div className="state-card">
+                  <span className="state-icon">🔍</span>
+                  <p className="state-message">No businesses found. Try a different search or location.</p>
+                </div>
+              )}
+
+              {!isLoading && displayedBusinesses.length > 0 && (
+                <div className="table-responsive-wrapper">
+                  <table className="business-table">
+                    <thead>
+                      <tr>
+                        <th className="th-business">Business</th>
+                        <th className="th-website">Website</th>
+                        <th className="th-socials">Socials</th>
+                        <th className="th-phone">Phone</th>
+                        <th className="th-email">Email</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displayedBusinesses.map((b, i) => (
+                        <BusinessRow key={i} business={b} />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          </main>
+
+          <footer className="app-footer">
+            <p>Business Finder MVP • Clean data presentation for outreach & local discovery</p>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

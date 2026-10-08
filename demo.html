@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Finder - Standalone Interactive Preview</title>
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-surface: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .app-header { margin-bottom: 2rem; }
+    .app-title { font-size: 2rem; font-weight: 700; color: #0f172a; letter-spacing: -0.025em; margin-bottom: 0.35rem; }
+    .app-subtitle { color: #64748b; font-size: 1rem; }
+
+    .search-form {
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      margin-bottom: 1.5rem;
+    }
+
+    .search-inputs {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .input-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .input-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .input-group input {
+      padding: 0.65rem 0.9rem;
+      font-size: 0.95rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background-color: #f8fafc;
+      color: #0f172a;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    .input-group input:focus {
+      border-color: #2563eb;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .search-btn {
+      padding: 0.68rem 1.75rem;
+      background-color: #2563eb;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .search-btn:hover { background-color: #1d4ed8; }
+
+    .quick-tags {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.85rem;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      color: #64748b;
+    }
+
+    .quick-tag-btn {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.78rem;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .quick-tag-btn:hover { background: #e2e8f0; color: #0f172a; }
+
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #ffffff;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 1.15rem;
+      height: 1.15rem;
+      accent-color: #2563eb;
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #1e293b;
+    }
+
+    .result-count { font-size: 0.95rem; color: #334155; }
+
+    .table-responsive {
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      overflow-x: auto;
+    }
+
+    .business-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .business-table th {
+      background-color: #f8fafc;
+      padding: 0.85rem 1rem;
+      font-weight: 600;
+      color: #475569;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .business-table td {
+      padding: 1rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    .business-table tbody tr:last-child td { border-bottom: none; }
+    .business-table tbody tr:hover { background-color: #f8fafc; }
+
+    .biz-name { font-weight: 600; color: #0f172a; }
+    .biz-subtext { display: block; font-size: 0.78rem; color: #94a3b8; margin-top: 2px; }
+
+    .website-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .website-badge.found {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+
+    .website-badge.not-found {
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .website-link { color: #15803d; font-weight: 600; text-decoration: none; }
+    .website-link:hover { text-decoration: underline; }
+    .no-website-text { color: #b91c1c; font-weight: 500; }
+
+    .social-links-list { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .social-pill {
+      background-color: #f1f5f9;
+      color: #334155;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid #e2e8f0;
+      text-decoration: none;
+    }
+    .social-pill:hover { background-color: #e2e8f0; }
+
+    .phone-link, .email-link { color: #334155; text-decoration: none; }
+    .phone-link:hover, .email-link:hover { color: #2563eb; text-decoration: underline; }
+    .text-muted { color: #94a3b8; font-style: italic; }
+
+    .state-box {
+      background: #ffffff;
+      padding: 3rem 2rem;
+      text-align: center;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin-top: 1rem;
+    }
+
+    .state-box.loading { color: #3b82f6; }
+    .state-box.empty { color: #64748b; }
+    .state-title { font-size: 1.05rem; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .search-inputs { flex-direction: column; align-items: stretch; }
+      .search-btn { width: 100%; }
+      .filter-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1 class="app-title">Business Finder</h1>
+      <p class="app-subtitle">Find local businesses and identify which ones do not have a website.</p>
+    </header>
+
+    <div class="search-form">
+      <div class="search-inputs">
+        <div class="input-group">
+          <label for="query-input">Business Type or Name</label>
+          <input id="query-input" type="text" value="Dental clinics" placeholder="e.g. Dental clinics, Restaurants" />
+        </div>
+        <div class="input-group">
+          <label for="location-input">Location (Optional)</label>
+          <input id="location-input" type="text" value="Hetauda" placeholder="e.g. Hetauda, Kathmandu" />
+        </div>
+        <button id="search-btn" class="search-btn" type="button">Search</button>
+      </div>
+
+      <div class="quick-tags">
+        <span>Try searching:</span>
+        <button class="quick-tag-btn" onclick="quickSearch('Dental clinics', 'Hetauda')">Dental clinics in Hetauda</button>
+        <button class="quick-tag-btn" onclick="quickSearch('Restaurants', 'Kathmandu')">Restaurants in Kathmandu</button>
+        <button class="quick-tag-btn" onclick="quickSearch('Hotels', 'Sauraha')">Hotels in Sauraha</button>
+        <button class="quick-tag-btn" onclick="quickSearch('Gyms', 'Hetauda')">Gyms in Hetauda</button>
+        <button class="quick-tag-btn" onclick="quickSearch('Beauty salons', 'Kathmandu')">Beauty salons in Kathmandu</button>
+      </div>
+    </div>
+
+    <!-- Filter Toggle -->
+    <div class="filter-bar" id="filter-bar">
+      <label class="checkbox-container">
+        <input type="checkbox" id="only-without-website" />
+        <span class="checkbox-label">Show only businesses without websites</span>
+      </label>
+      <div class="result-count" id="result-count">0 businesses found</div>
+    </div>
+
+    <!-- Table Container -->
+    <div id="results-area"></div>
+  </div>
+
+  <script>
+    const MOCK_DATA = [
+      {
+        name: "Smile Dental Clinic",
+        businessType: "Dental clinics",
+        location: "Hetauda",
+        website: "https://example.com/smiledental",
+        socials: [
+          { platform: "Instagram", url: "https://instagram.com/smiledentalhetauda" },
+          { platform: "Facebook", url: "https://facebook.com/smiledentalhetauda" }
+        ],
+        phone: "9801234567",
+        email: "contact@smiledental.com"
+      },
+      {
+        name: "Hetauda Dental Care",
+        businessType: "Dental clinics",
+        location: "Hetauda",
+        website: null,
+        socials: [{ platform: "Facebook", url: "https://facebook.com/hetaudadentalcare" }],
+        phone: "9812345678",
+        email: null
+      },
+      {
+        name: "City Dental Center",
+        businessType: "Dental clinics",
+        location: "Hetauda",
+        website: null,
+        socials: [],
+        phone: "9823456789",
+        email: "citydentalcenter@gmail.com"
+      },
+      {
+        name: "Makwanpur Dental Hospital",
+        businessType: "Dental clinics",
+        location: "Hetauda",
+        website: "https://makwanpurdental.com.np",
+        socials: [{ platform: "Facebook", url: "https://facebook.com/makwanpurdental" }],
+        phone: "057-520111",
+        email: "info@makwanpurdental.com.np"
+      },
+      {
+        name: "Om Dental Clinic & Orthodontics",
+        businessType: "Dental clinics",
+        location: "Hetauda",
+        website: null,
+        socials: [{ platform: "Instagram", url: "https://instagram.com/omdentalhetauda" }],
+        phone: "9845012345",
+        email: null
+      },
+      {
+        name: "Himalayan Java Coffee",
+        businessType: "Restaurants",
+        location: "Kathmandu",
+        website: "https://himalayanjava.com",
+        socials: [
+          { platform: "Instagram", url: "https://instagram.com/himalayan_java" },
+          { platform: "Facebook", url: "https://facebook.com/himalayanjava" }
+        ],
+        phone: "01-4422519",
+        email: "info@himalayanjava.com"
+      },
+      {
+        name: "Kathmandu Kitchen & Thakali House",
+        businessType: "Restaurants",
+        location: "Kathmandu",
+        website: null,
+        socials: [{ platform: "Facebook", url: "https://facebook.com/ktmkitchenthakali" }],
+        phone: "9851088776",
+        email: null
+      },
+      {
+        name: "Bhojan Griha",
+        businessType: "Restaurants",
+        location: "Kathmandu",
+        website: "https://bhojangriha.com",
+        socials: [{ platform: "Instagram", url: "https://instagram.com/bhojangriha" }],
+        phone: "01-4416423",
+        email: "bhojan@wlink.com.np"
+      },
+      {
+        name: "Newa Momo Corner",
+        businessType: "Restaurants",
+        location: "Kathmandu",
+        website: null,
+        socials: [],
+        phone: "9841223344",
+        email: null
+      },
+      {
+        name: "Everest Local Khaja Ghar",
+        businessType: "Restaurants",
+        location: "Kathmandu",
+        website: null,
+        socials: [{ platform: "Instagram", url: "https://instagram.com/everestkhajaghar" }],
+        phone: "9818990011",
+        email: null
+      },
+      {
+        name: "Chitwan Jungle Safari Lodge",
+        businessType: "Hotels",
+        location: "Sauraha",
+        website: "https://chitwanjungleresort.com",
+        socials: [
+          { platform: "Instagram", url: "https://instagram.com/chitwanjunglesafari" },
+          { platform: "Facebook", url: "https://facebook.com/chitwanjunglesafari" }
+        ],
+        phone: "056-580123",
+        email: "booking@chitwanjungleresort.com"
+      },
+      {
+        name: "Rhino Haven Resort",
+        businessType: "Hotels",
+        location: "Sauraha",
+        website: null,
+        socials: [{ platform: "Facebook", url: "https://facebook.com/rhinohavensauraha" }],
+        phone: "9855012345",
+        email: null
+      },
+      {
+        name: "Green Valley Guest House",
+        businessType: "Hotels",
+        location: "Sauraha",
+        website: null,
+        socials: [],
+        phone: "9845112233",
+        email: null
+      },
+      {
+        name: "Makwanpur Fitness Club",
+        businessType: "Gyms",
+        location: "Hetauda",
+        website: null,
+        socials: [
+          { platform: "Instagram", url: "https://instagram.com/makwanpurfitness" },
+          { platform: "Facebook", url: "https://facebook.com/makwanpurfitness" }
+        ],
+        phone: "9855099887",
+        email: null
+      },
+      {
+        name: "Powerhouse Gym & CrossFit",
+        businessType: "Gyms",
+        location: "Hetauda",
+        website: "https://powerhousegymhetauda.com",
+        socials: [{ platform: "Instagram", url: "https://instagram.com/powerhousegym_hetauda" }],
+        phone: "057-524455",
+        email: "fit@powerhousegymhetauda.com"
+      },
+      {
+        name: "Iron Paradise Hetauda",
+        businessType: "Gyms",
+        location: "Hetauda",
+        website: null,
+        socials: [],
+        phone: "9812445566",
+        email: null
+      },
+      {
+        name: "Glow & Shine Beauty Parlour",
+        businessType: "Beauty salons",
+        location: "Kathmandu",
+        website: null,
+        socials: [{ platform: "Instagram", url: "https://instagram.com/glowandshinektm" }],
+        phone: "9841556677",
+        email: null
+      },
+      {
+        name: "The Glam Lounge Nepal",
+        businessType: "Beauty salons",
+        location: "Kathmandu",
+        website: "https://theglamloungenepal.com",
+        socials: [
+          { platform: "Instagram", url: "https://instagram.com/theglamlounge" },
+          { platform: "Facebook", url: "https://facebook.com/theglamlounge" }
+        ],
+        phone: "01-4433221",
+        email: "hello@theglamloungenepal.com"
+      },
+      {
+        name: "Rosemary Herbal Salon",
+        businessType: "Beauty salons",
+        location: "Kathmandu",
+        website: null,
+        socials: [],
+        phone: "9813224455",
+        email: null
+      }
+    ];
+
+    let currentResults = [];
+
+    function runSearch() {
+      const q = document.getElementById('query-input').value.trim().toLowerCase();
+      const loc = document.getElementById('location-input').value.trim().toLowerCase();
+      const resultsArea = document.getElementById('results-area');
+
+      // Loading state
+      resultsArea.innerHTML = `
+        <div class="state-box loading">
+          <p class="state-title">Finding businesses...</p>
+        </div>
+      `;
+
+      setTimeout(() => {
+        currentResults = MOCK_DATA.filter(biz => {
+          const matchQ = !q || biz.name.toLowerCase().includes(q) || biz.businessType.toLowerCase().includes(q);
+          const matchLoc = !loc || biz.location.toLowerCase().includes(loc);
+          return matchQ && matchLoc;
+        });
+
+        render();
+      }, 200);
+    }
+
+    function render() {
+      const onlyWithoutWebsite = document.getElementById('only-without-website').checked;
+      const countEl = document.getElementById('result-count');
+      const resultsArea = document.getElementById('results-area');
+
+      const filtered = currentResults.filter(b => {
+        if (!onlyWithoutWebsite) return true;
+        return !b.website || b.website.trim() === '';
+      });
+
+      const totalCount = currentResults.length;
+      const filteredCount = currentResults.filter(b => !b.website || b.website.trim() === '').length;
+
+      if (onlyWithoutWebsite) {
+        countEl.innerHTML = `<strong>${filteredCount} ${filteredCount === 1 ? 'business' : 'businesses'} without websites</strong>`;
+      } else {
+        countEl.innerHTML = `<strong>${totalCount} ${totalCount === 1 ? 'business' : 'businesses'} found</strong>`;
+      }
+
+      if (totalCount === 0) {
+        resultsArea.innerHTML = `
+          <div class="state-box empty">
+            <p class="state-title">No businesses found. Try a different search or location.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (filtered.length === 0) {
+        resultsArea.innerHTML = `
+          <div class="state-box empty">
+            <p class="state-title">All businesses in this search have a website!</p>
+          </div>
+        `;
+        return;
+      }
+
+      let rowsHtml = '';
+      filtered.forEach(biz => {
+        const hasWeb = Boolean(biz.website && biz.website.trim());
+        const webHtml = hasWeb
+          ? `<div class="website-badge found">
+               <span>✅</span>
+               <a href="${biz.website}" target="_blank" rel="noopener noreferrer" class="website-link">Visit website</a>
+             </div>`
+          : `<div class="website-badge not-found">
+               <span>❌</span>
+               <span class="no-website-text">No website found</span>
+             </div>`;
+
+        let socialsHtml = '<span class="text-muted">Not found</span>';
+        if (biz.socials && biz.socials.length > 0) {
+          socialsHtml = '<div class="social-links-list">' + biz.socials.map(s => 
+            `<a href="${s.url}" target="_blank" rel="noopener noreferrer" class="social-pill">${s.platform}</a>`
+          ).join('') + '</div>';
+        }
+
+        const phoneHtml = biz.phone 
+          ? `<a href="tel:${biz.phone}" class="phone-link">${biz.phone}</a>`
+          : '<span class="text-muted">Not found</span>';
+
+        const emailHtml = biz.email 
+          ? `<a href="mailto:${biz.email}" class="email-link">${biz.email}</a>`
+          : '<span class="text-muted">Not found</span>';
+
+        rowsHtml += `
+          <tr>
+            <td class="cell-business">
+              <div class="biz-name">${biz.name}</div>
+              <span class="biz-subtext">${biz.location || ''}</span>
+            </td>
+            <td>${webHtml}</td>
+            <td>${socialsHtml}</td>
+            <td>${phoneHtml}</td>
+            <td>${emailHtml}</td>
+          </tr>
+        `;
+      });
+
+      resultsArea.innerHTML = `
+        <div class="table-responsive">
+          <table class="business-table">
+            <thead>
+              <tr>
+                <th>Business</th>
+                <th>Website</th>
+                <th>Socials</th>
+                <th>Phone</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function quickSearch(q, loc) {
+      document.getElementById('query-input').value = q;
+      document.getElementById('location-input').value = loc;
+      runSearch();
+    }
+
+    document.getElementById('search-btn').addEventListener('click', runSearch);
+    document.getElementById('only-without-website').addEventListener('change', render);
+
+    // Initial search
+    runSearch();
+  </script>
+</body>
+</html>
